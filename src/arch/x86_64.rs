@@ -48,15 +48,10 @@ pub unsafe fn swap(arg: usize, old_sp: &mut StackPointer, new_sp: &StackPointer)
       # Save frame pointer explicitly; LLVM doesn't spill it even if it is
       # marked as clobbered.
       pushq   %rbp
-      # Push instruction pointer of the old context and switch to
-      # the new context.
-      call    1f
-      # Restore frame pointer.
-      popq    %rbp
-      # Continue executing old context.
-      jmp     2f
+      # Push instruction pointer of the old context.
+      leaq    1f(%rip), %rax
+      pushq   %rax
 
-    1:
       # Remember stack pointer of the old context, in case %rdx==%rsi.
       movq    %rsp, %rbx
       # Load stack pointer of the new context.
@@ -69,7 +64,11 @@ pub unsafe fn swap(arg: usize, old_sp: &mut StackPointer, new_sp: &StackPointer)
       # address mispredictions (~8ns on Ivy Bridge).
       popq    %rbx
       jmpq    *%rbx
-    2:
+
+    1:
+      # Restore frame pointer.
+      popq    %rbp
+      # Continue executing old context.
     "#
     : "={rdi}" (ret)
     : "{rdi}" (arg)
