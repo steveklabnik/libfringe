@@ -1,5 +1,6 @@
 [package]
 authors = ["Nathan Zadoks <nathan@nathan7.eu>"]
+license = "MIT OR Apache-2.0"
 name = "fringe"
 version = "0.0.1"
 
